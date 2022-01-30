@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using CryptoAlgorithmLibrary.Helpers;
+
+using System;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
@@ -54,13 +54,12 @@ namespace CryptoAlgorithmLibrary.RSA
 
         private void CalculatePrivateKey()
         {
-            //ushort prime1BitSize = prime1.GetBitsize();
-            //ushort prime2BitSize = prime2.GetBitsize();
-            //if (prime1BitSize < 126 || prime2BitSize < 126)
-            //{
-            //    MessageBox.Show("Please insert numbers with at least 126 bits", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            //    return false;
-            //}
+            ushort prime1BitSize = prime1.GetBitsize();
+            ushort prime2BitSize = prime2.GetBitsize();
+            if (prime1BitSize < 126 || prime2BitSize < 126)
+            {
+                ThrowHelper.ArgumentException("Please insert numbers with at least 126 bits");
+            }
 
             modulus = BigInteger.Multiply(prime1, prime2);
 
@@ -72,11 +71,10 @@ namespace CryptoAlgorithmLibrary.RSA
         {
             //Pegar tamanho dos blocos
             int blocklen = (modulus.GetBitsize() / 8) - 4;
-            //if (blocklen < 5)
-            //{
-            //    MessageBox.Show("Key too small", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            //    changeStatus("PubEncrypt: error");
-            //}
+            if (blocklen < 5)
+            {
+                return ThrowHelper.ArgumentException<string>("Key too small", nameof(modulus));
+            }
 
             //Dividir plaintext em blocos
             byte[] plaintextArr = Encoding.UTF8.GetBytes(text);
@@ -119,7 +117,7 @@ namespace CryptoAlgorithmLibrary.RSA
                 byte[] cryptArr;
                 cryptArr = Base58CheckEncoding.Decode(cryptBlock);
 
-                BigInteger crypt = new (cryptArr);
+                BigInteger crypt = new(cryptArr);
                 BigInteger decrypt = BigInteger.ModPow(crypt, privateExp, modulus);
 
                 //Remove padding
@@ -136,10 +134,10 @@ namespace CryptoAlgorithmLibrary.RSA
 
             return finalString.ToString();
         }
-    
+
         public void UpdatePrime1(BigInteger newPrime1)
         {
-            prime1 = newPrime1; 
+            prime1 = newPrime1;
             if (prime2 > prime1)
             {
                 BigInteger test = prime1;

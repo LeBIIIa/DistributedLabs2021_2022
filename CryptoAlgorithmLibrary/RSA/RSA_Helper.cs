@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CryptoAlgorithmLibrary.RSA
 {
@@ -82,20 +79,13 @@ namespace CryptoAlgorithmLibrary.RSA
                 a += 1;
             }
 
-
-            //2. m = (w−1) / 2^a.  << desnecessario pois é o mesmo result da ultima operacao
-            //BigInteger m = (w - 1) / BigInteger.Pow(2, a);
-
-
             //3. wlen = len (w).
             ushort bitsize = w.GetBitsize();
-            int wlen = bitsize / 8; //fixos
+            int wlen = bitsize / 8;
             if (bitsize % 8 == 0)
                 wlen++;
             if (wlen == 0)
                 wlen++;
-            //Debug.WriteLine("wLen: {0}\tBitsize: {1}", wlen, w.GetBitsize());
-            //Debug.WriteLine("---");
 
             RandomNumberGenerator rbg = RandomNumberGenerator.Create();
             byte[] bytes = new byte[wlen];
@@ -117,19 +107,14 @@ namespace CryptoAlgorithmLibrary.RSA
 
                     bytes[wlen - 1] = unchecked((byte)((0xFF >> 1 + (7 - (bitsize % 8))) & bytes[wlen - 1]));
                     b = new BigInteger(bytes);
-                    //Debug.WriteLine("Bitsize: {0}\tmod:{1}\tLastByte: {2}\tdec: {3}", b.GetBitsize(), (b.GetBitsize() % 8), Convert.ToString(bytes[wlen - 1], 2).PadLeft(8, '0'), b);
                 } while (b <= 1 || b >= w - 1);
-                //Debug.WriteLine("cycles: {0}", cycles);
-
 
                 //4.3 z = b^m mod w
                 BigInteger z = BigInteger.ModPow(b, m, w);
 
-
                 //4.4 If ((z = 1) or (z = w − 1)), then go to step 4.7.
                 if (z == 1 || z == w - 1)
                     continue;
-
 
                 //4.5 For j = 1 to a − 1 do
                 for (int j = 1; j < a; j++)
@@ -141,10 +126,9 @@ namespace CryptoAlgorithmLibrary.RSA
                         return false;                   //4.6 ret composite
                 }
 
-                //esse cara aqui, de onde ele surgiu? Super necessário!
                 if (z != w - 1)
                     return false;
-            }//4.7 - fim for iteracoes
+            }
 
 
             return true;
